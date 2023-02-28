@@ -16,7 +16,7 @@ public class BeanFactory {
 //    for now we have config package, configurations will be stored as xml
     private BeanFactory() {
         this.configuration = new JavaConfiguration();
-        this.beanConfigurator = new JavaBeanConfigurator(configuration.GetPackageToScan());
+        this.beanConfigurator = new JavaBeanConfigurator(configuration.GetPackageToScan(), configuration.getInterfaceToImplementetions());
     }
 
     public static BeanFactory getInstance(){

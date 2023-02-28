@@ -19,9 +19,9 @@ public class FrontServiceImpl implements FrontService {
     @Override
     public void siteLoading() {
         try {
-            musicService = BeanFactory.getInstance().getBean(MusicService.class);
+//            musicService = BeanFactory.getInstance().getBean(MusicService.class);
             musicService.musicLoading();
-            pictureService = BeanFactory.getInstance().getBean(PictureService.class);
+//            pictureService = BeanFactory.getInstance().getBean(PictureService.class);
             pictureService.pictureLoading();
             TimeUnit.SECONDS.sleep(2);
         } catch (InterruptedException e) {

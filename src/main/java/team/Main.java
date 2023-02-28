@@ -16,6 +16,6 @@ public class Main {
         serviceB.jobB();
         musicService.musicLoading();
         pictureService.pictureLoading();
-        frontService.siteLoading();
+//        frontService.siteLoading();
     }
 }

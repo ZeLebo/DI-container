@@ -14,8 +14,6 @@ public class Main {
         PictureService pictureService = BeanFactory.getInstance().getBean(PictureService.class);
         FrontService frontService = BeanFactory.getInstance().getBean(FrontService.class);
         serviceB.jobB();
-        musicService.musicLoading();
-        pictureService.pictureLoading();
-//        frontService.siteLoading();
+        frontService.siteLoading();
     }
 }

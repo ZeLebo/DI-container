@@ -6,6 +6,7 @@ import team.config.JavaConfiguration;
 import team.configurator.BeanConfigurator;
 import team.configurator.JavaBeanConfigurator;
 
+
 //The BeanFactory is the actual container which instantiates, configures, and manages a number of beans.
 public class BeanFactory {
 //    singleton

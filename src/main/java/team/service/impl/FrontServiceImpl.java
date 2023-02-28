@@ -2,6 +2,7 @@ package team.service.impl;
 
 import team.annotations.Inject;
 import team.annotations.Service;
+import team.factory.BeanFactory;
 import team.service.FrontService;
 import team.service.MusicService;
 import team.service.PictureService;
@@ -18,7 +19,9 @@ public class FrontServiceImpl implements FrontService {
     @Override
     public void siteLoading() {
         try {
+            musicService = BeanFactory.getInstance().getBean(MusicService.class);
             musicService.musicLoading();
+            pictureService = BeanFactory.getInstance().getBean(PictureService.class);
             pictureService.pictureLoading();
             TimeUnit.SECONDS.sleep(2);
         } catch (InterruptedException e) {

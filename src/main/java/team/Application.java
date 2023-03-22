@@ -17,19 +17,13 @@ public class Application {
     public static void  main(String[] args) {
         Application application = new Application();
         ApplicationContext context = application.run();
-//
-//        ServiceB serviceB = context.getBean(ServiceB.class);
-//        FrontService frontService = context.getBean(FrontService.class);
-//        serviceB.jobB();
-//        frontService.siteLoading();
+
+        ServiceB serviceB = context.getBean(ServiceB.class);
+        FrontService frontService = context.getBean(FrontService.class);
+        serviceB.jobB();
+        frontService.siteLoading();
 
         SomeService someService = context.getBean(SomeService.class);
         someService.prepare();
-
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
     }
 }

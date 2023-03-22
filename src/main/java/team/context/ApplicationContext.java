@@ -2,8 +2,8 @@ package team.context;
 
 import lombok.Setter;
 import lombok.SneakyThrows;
+import team.annotations.PostConstruct;
 import team.factory.BeanFactory;
-import team.postprocessor.BeanPostProcessor;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,9 +31,10 @@ public class ApplicationContext {
 
     @SneakyThrows
     private void callPostProcessors(Object bean) {
-        for(Class processor : beanFactory.getBeanConfigurator().getScanner().getSubTypesOf(BeanPostProcessor.class)) {
-            BeanPostProcessor postProcessor = (BeanPostProcessor) processor.getDeclaredConstructor().newInstance();
-            postProcessor.process(bean);
+        for (var method : bean.getClass().getMethods()) {
+            if (method.isAnnotationPresent(PostConstruct.class)) {
+                method.invoke(bean);
+            }
         }
     }
 }

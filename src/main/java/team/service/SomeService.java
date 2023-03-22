@@ -5,9 +5,6 @@ import team.annotations.PostConstruct;
 
 public class SomeService {
 
-    public SomeService() {
-    }
-
     @Inject
     private ServiceB serviceB;
 

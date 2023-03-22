@@ -1,15 +1,16 @@
 package team.config;
 
-import team.annotations.PostConstruct;
 import team.service.ServiceB;
 import team.service.impl.ServiceBAnotherImpl;
+import team.Application;
 
 import java.util.Map;
 
 public class JavaConfiguration implements Configuration {
     @Override
     public String GetPackageToScan() {
-        return "team.service.impl";
+        // get the root of the project
+        return Application.class.getPackageName();
     }
 
     @Override

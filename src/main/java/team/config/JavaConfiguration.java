@@ -1,5 +1,6 @@
 package team.config;
 
+import team.annotations.PostConstruct;
 import team.service.ServiceB;
 import team.service.impl.ServiceBAnotherImpl;
 

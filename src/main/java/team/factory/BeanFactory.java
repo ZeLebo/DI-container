@@ -1,11 +1,14 @@
 package team.factory;
 
+import lombok.Getter;
 import lombok.SneakyThrows;
+import team.DIContext;
 import team.annotations.Inject;
 import team.config.Configuration;
 import team.config.JavaConfiguration;
 import team.configurator.BeanConfigurator;
 import team.configurator.JavaBeanConfigurator;
+import team.context.ApplicationContext;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -13,20 +16,19 @@ import java.util.stream.Collectors;
 
 //The BeanFactory is the actual container which instantiates, configures, and manages a number of beans.
 public class BeanFactory {
-//    singleton
-    private static final BeanFactory BEAN_FACTORY = new BeanFactory();
+    @Getter
     private final BeanConfigurator beanConfigurator;
     private final Configuration configuration;
+    // application context
+    private ApplicationContext applicationContext;
 
 //    for now we have config package, configurations will be stored as xml
-    private BeanFactory() {
+    public BeanFactory(ApplicationContext applicationContext) {
         this.configuration = new JavaConfiguration();
         this.beanConfigurator = new JavaBeanConfigurator(configuration.GetPackageToScan(), configuration.getInterfaceToImplementetions());
+        this.applicationContext = applicationContext;
     }
-
-    public static BeanFactory getInstance(){
-        return BEAN_FACTORY;
-    }
+    
 //    Add exceptions checking later
     @SneakyThrows
     public <T> T getBean(Class<T> tClass) {
@@ -41,7 +43,7 @@ public class BeanFactory {
 //        go through the beans fields and see which dependencies need to be implemented
         for(Field field : Arrays.stream(implementationClass.getDeclaredFields()).filter(field -> field.isAnnotationPresent(Inject.class)).collect(Collectors.toList())) {
             field.setAccessible(true);
-            field.set(bean, BEAN_FACTORY.getBean(field.getType()));
+            field.set(bean, applicationContext.getBean(field.getType()));
         }
 
         return bean;

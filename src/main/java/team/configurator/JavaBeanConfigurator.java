@@ -1,5 +1,6 @@
 package team.configurator;
 
+import lombok.Getter;
 import org.reflections.Reflections;
 
 import java.util.Map;
@@ -9,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class JavaBeanConfigurator implements BeanConfigurator {
 
     //    Convenient tool for scanning packages from lib org.reflection
+    @Getter
     private final Reflections scanner;
     private final Map<Class, Class> interfaceToImplementation;
 

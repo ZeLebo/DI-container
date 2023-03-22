@@ -1,8 +1,7 @@
 package team.service.impl;
-import team.annotations.Service;
+
 import team.service.ServiceB;
 
-@Service
 public class ServiceBAnotherImpl implements ServiceB {
     @Override
     public void jobB() {

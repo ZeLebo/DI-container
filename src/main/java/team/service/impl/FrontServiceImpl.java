@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 public class FrontServiceImpl implements FrontService {
     @Inject
     private MusicService musicService;
+
     @Inject
     private PictureService pictureService;
 

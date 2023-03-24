@@ -1,5 +1,6 @@
 package team.service.impl;
 
+import team.annotations.PostConstruct;
 import team.annotations.Service;
 import team.service.PictureService;
 
@@ -13,4 +14,5 @@ public class PictureServiceImpl implements PictureService {
         TimeUnit.SECONDS.sleep(1);
         System.out.println("The pictures have been loaded to all the computers all over the world");
     }
+
 }

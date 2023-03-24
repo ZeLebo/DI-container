@@ -2,7 +2,6 @@ package team.factory;
 
 import lombok.Getter;
 import lombok.SneakyThrows;
-import team.DIContext;
 import team.annotations.Inject;
 import team.config.Configuration;
 import team.config.JavaConfiguration;

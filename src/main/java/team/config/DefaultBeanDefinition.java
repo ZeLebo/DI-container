@@ -5,6 +5,7 @@ public class DefaultBeanDefinition implements BeanDefinition {
     private String beanName;
     private String beanClassName;
     private String scope;
+    private Object bean;
 
     @Override
     public String getBeanName() {
@@ -14,6 +15,16 @@ public class DefaultBeanDefinition implements BeanDefinition {
     @Override
     public void SetBeanName(String beanName) {
         this.beanName = beanName;
+    }
+
+    @Override
+    public Object getBean() {
+        return this.bean;
+    }
+
+    @Override
+    public void setBean(Object bean) {
+        this.bean = bean;
     }
 
     @Override

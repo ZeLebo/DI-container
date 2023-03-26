@@ -1,6 +1,9 @@
 package team.context;
 
 import lombok.Setter;
+import team.configurator.BeanConfigurator;
+import team.configurator.metadata.JavaBeanConfigurator;
+import team.configurator.metadata.XMLBeanConfigurator;
 import team.factory.BeanFactory;
 
 public class ApplicationContext {
@@ -8,7 +11,15 @@ public class ApplicationContext {
     private BeanFactory beanFactory;
 
     public ApplicationContext(String packageToScan) {
-        BeanFactory beanFactory = new BeanFactory(this, packageToScan);
+        BeanConfigurator beanConfigurator = null;
+        if (packageToScan.endsWith(".xml")) {
+            beanConfigurator = new XMLBeanConfigurator(packageToScan);
+        } else {
+            beanConfigurator = new JavaBeanConfigurator(packageToScan);
+
+        }
+        BeanFactory beanFactory = new BeanFactory(beanConfigurator);
+        beanConfigurator.setBeanFactory(beanFactory);
         this.setBeanFactory(beanFactory);
     }
 

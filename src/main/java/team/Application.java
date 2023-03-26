@@ -10,5 +10,8 @@ public class Application {
 
         ServiceB serviceB = context.getBean(ServiceB.class);
         serviceB.jobB();
+
+        FrontService front = context.getBean(FrontService.class);
+        front.siteLoading();
     }
 }

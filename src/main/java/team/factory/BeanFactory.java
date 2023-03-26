@@ -25,11 +25,20 @@ public class BeanFactory {
     }
 
     // check the bean in the map and generate if not exist
-    public <T> T getBean(Class<T> tClass) {
+    public <T> T getBean(Class<T> tClass) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         // check for the bean in map
         if (singletonBeanMap.containsKey(tClass)) {
             return (T) singletonBeanMap.get(tClass).getBean();
         }
+        if (threadBeanMap.containsKey(tClass)) {
+            if (threadBeanMap.get(tClass).containsKey(Thread.currentThread())) {
+                return (T) threadBeanMap.get(tClass).get(Thread.currentThread()).getBean();
+            }
+        }
+        if (providedBeanMap.containsKey(tClass)) {
+            return (T) providedBeanMap.get(tClass).getBean().getClass().getDeclaredConstructor().newInstance();
+        }
+
 
         DefaultBeanDefinition bean = null;
         try {

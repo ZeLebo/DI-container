@@ -1,7 +1,6 @@
 package team.service.impl;
 
 import team.annotations.Inject;
-import team.annotations.Thread;
 import team.annotations.Service;
 import team.service.FrontService;
 import team.service.MusicService;

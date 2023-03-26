@@ -11,36 +11,34 @@ import team.context.ApplicationContext;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
-import java.util.stream.Collectors;
 
-//The BeanFactory is the actual container which instantiates, configures, and manages a number of beans.
+/*
+    BeanFactory manages the beans themselves
+ */
 public class BeanFactory {
     @Getter
     private final BeanConfigurator beanConfigurator;
-    private final Configuration configuration;
-    // application context
-    private ApplicationContext applicationContext;
+    private final ApplicationContext applicationContext;
 
-//    for now we have config package, configurations will be stored as xml
+    // for now, we have config package, configurations will be stored as xml
     public BeanFactory(ApplicationContext applicationContext) {
-        this.configuration = new JavaConfiguration();
+        Configuration configuration = new JavaConfiguration();
         this.beanConfigurator = new JavaBeanConfigurator(configuration.GetPackageToScan(), configuration.getInterfaceToImplementetions());
         this.applicationContext = applicationContext;
     }
     
-//    Add exceptions checking later
     @SneakyThrows
     public <T> T getBean(Class<T> tClass) {
-//         check if tClass is interface then find suitable implementation
-//         else tClass is just a class then only create it
+    // check if tClass is interface then find suitable implementation
+    // else tClass is just a class then only create it
         Class<? extends T> implementationClass = tClass;
         if (implementationClass.isInterface()) {
             implementationClass = beanConfigurator.getImplementationClass(implementationClass);
         }
         T bean = implementationClass.getDeclaredConstructor().newInstance();
 
-//        go through the beans fields and see which dependencies need to be implemented
-        for(Field field : Arrays.stream(implementationClass.getDeclaredFields()).filter(field -> field.isAnnotationPresent(Inject.class)).collect(Collectors.toList())) {
+        // inject all the fields with annotation @inject
+        for(Field field : Arrays.stream(implementationClass.getDeclaredFields()).filter(field -> field.isAnnotationPresent(Inject.class)).toList()) {
             field.setAccessible(true);
             field.set(bean, applicationContext.getBean(field.getType()));
         }

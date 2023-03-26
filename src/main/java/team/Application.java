@@ -1,22 +1,12 @@
 package team;
 
-import lombok.SneakyThrows;
 import team.context.ApplicationContext;
-import team.factory.BeanFactory;
 import team.service.*;
 
 public class Application {
-    public ApplicationContext run() {
-        ApplicationContext applicationContext = new ApplicationContext();
-        BeanFactory beanFactory = new BeanFactory(applicationContext);
-        applicationContext.setBeanFactory(beanFactory);
-
-        return applicationContext;
-    }
 
     public static void  main(String[] args) {
-        Application application = new Application();
-        ApplicationContext context = application.run();
+        ApplicationContext context = new ApplicationContext();
 
         ServiceB serviceB = context.getBean(ServiceB.class);
         FrontService frontService = context.getBean(FrontService.class);

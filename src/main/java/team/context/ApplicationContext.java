@@ -11,20 +11,25 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ApplicationContext {
     @Setter
     private BeanFactory beanFactory;
-    private final Map<Class, Object> beanMap = new ConcurrentHashMap<>();
+    // todo change something to beanDefinition (use it as proxy)
+    private final Map<Class, Object> singletonBeanMap = new ConcurrentHashMap<>();
+    private final Map<Class, Object> threadBeanMap = new ConcurrentHashMap<>();
 
     public ApplicationContext() {
+        BeanFactory beanFactory = new BeanFactory(this);
+        this.setBeanFactory(beanFactory);
     }
 
+    // get the bean from map, if the bean doesn't exist -> create and return
     public <T> T getBean(Class<T> tClass) {
-        if (beanMap.containsKey((tClass))) {
-            return (T) beanMap.get(tClass);
+        if (singletonBeanMap.containsKey((tClass))) {
+            return (T) singletonBeanMap.get(tClass);
         }
 
         T bean = beanFactory.getBean(tClass);
         this.callPostProcessors(bean);
 
-        beanMap.put(tClass, bean);
+        singletonBeanMap.put(tClass, bean);
 
         return bean;
     }

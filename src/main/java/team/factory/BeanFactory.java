@@ -1,6 +1,7 @@
 package team.factory;
 
 import lombok.Getter;
+import team.config.BeanDefinition;
 import team.config.DefaultBeanDefinition;
 import team.configurator.BeanConfigurator;
 
@@ -12,9 +13,9 @@ import java.util.concurrent.ConcurrentHashMap;
     BeanFactory manages the beans themselves
  */
 public class BeanFactory {
-    private final Map<Class, DefaultBeanDefinition> singletonBeanMap = new ConcurrentHashMap<>();
-    private final Map<Class, Map<Thread, DefaultBeanDefinition>> threadBeanMap = new ConcurrentHashMap<>();
-    private final Map<Class, DefaultBeanDefinition> providedBeanMap = new ConcurrentHashMap<>();
+    private final Map<Class, BeanDefinition> singletonBeanMap = new ConcurrentHashMap<>();
+    private final Map<Class, Map<Thread, BeanDefinition>> threadBeanMap = new ConcurrentHashMap<>();
+    private final Map<Class, BeanDefinition> providedBeanMap = new ConcurrentHashMap<>();
 
 
     @Getter
@@ -39,8 +40,7 @@ public class BeanFactory {
             return (T) providedBeanMap.get(tClass).getBean().getClass().getDeclaredConstructor().newInstance();
         }
 
-
-        DefaultBeanDefinition bean = null;
+        BeanDefinition bean = null;
         try {
             bean = beanConfigurator.generateBean(tClass);
         } catch (InstantiationException | InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {

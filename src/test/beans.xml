@@ -6,7 +6,7 @@
     <beans>
         <bean id="ServiceBImpl" class="team.service.impl.ServiceBImpl"/>
         <bean id="serviceB" class="team.service.ServiceB">
-            <constructor-arg ref="serviceB"/>
+            <constructor-arg ref="serviceBImpl"/>
         </bean>
     </beans>
 </configuration>

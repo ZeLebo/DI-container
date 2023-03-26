@@ -6,6 +6,7 @@ import team.configurator.metadata.JavaBeanConfigurator;
 import team.configurator.metadata.XMLBeanConfigurator;
 import team.factory.BeanFactory;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 
 public class ApplicationContext {
@@ -15,6 +16,13 @@ public class ApplicationContext {
     public ApplicationContext(String packageToScan) {
         BeanConfigurator beanConfigurator = null;
         if (packageToScan.endsWith(".xml")) {
+            File file = new File(packageToScan);
+            if (!file.exists()) {
+                throw new RuntimeException("File " + packageToScan + " doesn't exist");
+            }
+            if (!file.isFile()) {
+                throw new RuntimeException(packageToScan + " is not a file");
+            }
             beanConfigurator = new XMLBeanConfigurator(packageToScan);
         } else {
             beanConfigurator = new JavaBeanConfigurator(packageToScan);

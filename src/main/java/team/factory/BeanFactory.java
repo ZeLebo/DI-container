@@ -60,6 +60,7 @@ public class BeanFactory {
 
     private <T> T generateBean(Class<T> tClass) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         if (tClass.isInterface()) {
+            // find all the classes that are subtypes
             tClass = (Class<T>) beanConfigurator.getImplementationClass(tClass);
         }
         T bean = tClass.getDeclaredConstructor().newInstance();

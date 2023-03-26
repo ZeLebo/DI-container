@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <base-packages>
+        <base-package>team</base-package>
+    </base-packages>
+    <beans>
+        <bean id="ServiceBImpl" class="team.service.impl.ServiceBImpl"/>
+        <bean id="serviceB" class="team.service.ServiceB">
+            <constructor-arg ref="serviceB"/>
+        </bean>
+    </beans>
+</configuration>

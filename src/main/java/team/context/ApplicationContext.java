@@ -2,6 +2,7 @@ package team.context;
 
 import lombok.Setter;
 import team.config.Configuration;
+import team.configurator.metadata.XMLBeanConfigurator;
 import team.factory.BeanFactory;
 
 public class ApplicationContext {

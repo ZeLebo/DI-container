@@ -6,7 +6,7 @@ import team.service.*;
 public class Application {
 
     public static void  main(String[] args) {
-        ApplicationContext context = new ApplicationContext();
+        ApplicationContext context = new ApplicationContext("team");
 
         ServiceB serviceB = context.getBean(ServiceB.class);
         serviceB.jobB();

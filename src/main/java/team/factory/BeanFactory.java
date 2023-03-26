@@ -1,11 +1,9 @@
 package team.factory;
 
 import lombok.Getter;
-import lombok.SneakyThrows;
 import team.annotations.Inject;
 import team.annotations.PostConstruct;
 import team.config.Configuration;
-import team.config.JavaConfiguration;
 import team.configurator.BeanConfigurator;
 import team.configurator.metadata.JavaBeanConfigurator;
 import team.context.ApplicationContext;
@@ -29,18 +27,12 @@ public class BeanFactory {
     private final BeanConfigurator beanConfigurator;
     private final ApplicationContext applicationContext;
 
-    // for now, we have config package, configurations will be stored as xml
-    public BeanFactory(ApplicationContext applicationContext) {
-        Configuration configuration = new JavaConfiguration();
-        this.beanConfigurator = new JavaBeanConfigurator(configuration.GetPackageToScan(), configuration.getInterfaceToImplementetions());
+    public BeanFactory(ApplicationContext applicationContext, String packageToScan) {
         this.applicationContext = applicationContext;
+        this.beanConfigurator = new JavaBeanConfigurator(packageToScan);
     }
 
-    public BeanFactory(ApplicationContext applicationContext, Configuration configuration) {
-        this.applicationContext = applicationContext;
-        this.beanConfigurator = new JavaBeanConfigurator(configuration.GetPackageToScan(), configuration.getInterfaceToImplementetions());
-    }
-    
+    // check the bean in the map and generate if not exist
     public <T> T getBean(Class<T> tClass) {
         // check for the bean in map
         if (singletonBeanMap.containsKey(tClass)) {
@@ -55,6 +47,8 @@ public class BeanFactory {
         }
         this.callPostProcessor(bean);
 
+        singletonBeanMap.put(tClass, bean);
+
         return bean;
     }
 
@@ -64,6 +58,8 @@ public class BeanFactory {
             tClass = (Class<T>) beanConfigurator.getImplementationClass(tClass);
         }
         T bean = tClass.getDeclaredConstructor().newInstance();
+
+        // put in the map
 
         // inject all the fields with annotation @inject
         for (Field field : Arrays.stream(tClass.getDeclaredFields()).filter(field -> field.isAnnotationPresent(Inject.class)).toList()) {

@@ -1,20 +1,14 @@
 package team.context;
 
 import lombok.Setter;
-import team.config.Configuration;
-import team.configurator.metadata.XMLBeanConfigurator;
 import team.factory.BeanFactory;
 
 public class ApplicationContext {
     @Setter
     private BeanFactory beanFactory;
-    public ApplicationContext() {
-        BeanFactory beanFactory = new BeanFactory(this);
-        this.setBeanFactory(beanFactory);
-    }
 
-    public ApplicationContext(Configuration configuration) {
-        BeanFactory beanFactory = new BeanFactory(this, configuration);
+    public ApplicationContext(String packageToScan) {
+        BeanFactory beanFactory = new BeanFactory(this, packageToScan);
         this.setBeanFactory(beanFactory);
     }
 

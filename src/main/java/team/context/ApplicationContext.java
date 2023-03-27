@@ -35,7 +35,6 @@ public class ApplicationContext {
 
     // get the bean from map, if the bean doesn't exist -> create and return
     public <T> T getBean(Class<T> tClass) {
-        System.out.println(Thread.currentThread().getName());
         try {
             return beanFactory.getBean(tClass);
         } catch (InstantiationException e) {

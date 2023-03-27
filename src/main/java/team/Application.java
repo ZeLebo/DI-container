@@ -6,16 +6,30 @@ import team.service.*;
 
 public class Application {
 
+//    volatile static ApplicationContext context = new ApplicationContext("team");
+
     @SneakyThrows
     public static void main(String[] args) {
-         ApplicationContext context = new ApplicationContext("src/test/beans.xml");
-        // ApplicationContext context = new ApplicationContext("team");
+//         ApplicationContext context = new ApplicationContext("src/test/beans.xml");
+        ApplicationContext context = new ApplicationContext("team");
 
-         ServiceB serviceB = context.getBean(ServiceB.class);
-         serviceB.jobB();
+        ServiceB serviceB = context.getBean(ServiceB.class);
+        serviceB.jobB();
+        serviceB.jobB();
 
-         MusicService music = context.getBean(MusicService.class);
-         music.musicLoading();
+//        // make thread where new instance of ServiceB will be created and called jobB()
+        final Thread thread = new Thread(() -> {
+            ServiceB serviceB1 = context.getBean(ServiceB.class);
+            serviceB1.jobB();
+
+        });
+        System.out.println(thread == Thread.currentThread());
+        thread.start();
+        thread.join();
+
+//        TestThread thread = new TestThread(context);
+//        thread.Run();
+    }
 
 
 /*
@@ -24,6 +38,4 @@ public class Application {
         FrontService front = context.getBean(FrontService.class);
         front.siteLoading();
 */
-
-    }
 }

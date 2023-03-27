@@ -5,17 +5,13 @@ import lombok.SneakyThrows;
 import org.reflections.Reflections;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import team.config.BeanDefinition;
 import team.config.DefaultBeanDefinition;
 import team.configurator.BeanConfigurator;
 import team.factory.BeanFactory;
-import team.service.ServiceB;
-import team.service.impl.ServiceBImpl;
 
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

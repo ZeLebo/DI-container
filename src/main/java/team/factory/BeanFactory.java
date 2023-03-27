@@ -26,7 +26,8 @@ public class BeanFactory {
     }
 
     // check the bean in the map and generate if not exist
-    public <T> T getBean(Class<T> tClass) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+    public synchronized <T> T getBean(Class<T> tClass) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+        System.out.println("Accessed from " + Thread.currentThread());
         // check for the bean in map
         if (singletonBeanMap.containsKey(tClass)) {
             return (T) singletonBeanMap.get(tClass).getBean();
@@ -49,10 +50,13 @@ public class BeanFactory {
         switch (bean.getScope()) {
             case "singleton":
                 singletonBeanMap.put(tClass, bean);
+                break;
             case "thread":
                 threadBeanMap.put(tClass, Map.of(Thread.currentThread(), bean));
+                break;
             case "provided":
                 providedBeanMap.put(tClass, bean);
+                break;
         }
 
         return (T) bean.getBean();

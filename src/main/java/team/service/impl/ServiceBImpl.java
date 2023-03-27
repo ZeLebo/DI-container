@@ -2,13 +2,18 @@ package team.service.impl;
 
 import team.annotations.PostConstruct;
 import team.annotations.Service;
+import team.annotations.Thread;
 import team.service.ServiceB;
 
+
 @Service
+@Thread
 public class ServiceBImpl implements ServiceB {
+    private int cnt;
     @Override
     public void jobB() {
-        System.out.println("The needed work has been done");
+        this.cnt++;
+        System.out.println("The needed work has been done" + cnt);
     }
 
     @PostConstruct

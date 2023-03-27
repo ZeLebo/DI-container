@@ -18,13 +18,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@SuppressWarnings("unused")
 public class XMLBeanConfigurator implements BeanConfigurator {
     @Getter
     private Reflections scanner;
     private String FILENAME = "beans.xml";
     private final Map<Class, Class> interfaceToImplementation;
-    private BeanFactory beanFactory;
-    private static Map<Class, BeanDefinition> beans = new ConcurrentHashMap<>();
+    private static final Map<Class, BeanDefinition> beans = new ConcurrentHashMap<>();
 
     private static final String BASE_PACKAGE_TAG = "base-package";
     private static final String BEAN_TAG = "bean";
@@ -58,7 +58,6 @@ public class XMLBeanConfigurator implements BeanConfigurator {
 
     @Override
     public void setBeanFactory(BeanFactory beanFactory) {
-        this.beanFactory = beanFactory;
     }
 
     public void parseXML() {
@@ -79,6 +78,7 @@ public class XMLBeanConfigurator implements BeanConfigurator {
             Element bean = (Element) beans.item(i);
             BeanDefinition beanDefinition = new DefaultBeanDefinition();
             beanDefinition.setBeanClassName(bean.getAttribute(BEAN_CLASS_NAME_ATTRIBUTE));
+            beanDefinition.setBean(bean);
         }
     }
 

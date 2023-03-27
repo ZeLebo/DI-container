@@ -1,10 +1,13 @@
 package team.config;
 
+import java.lang.reflect.InvocationTargetException;
+
 @SuppressWarnings("unused")
 public class DefaultBeanDefinition implements BeanDefinition {
     private String beanName;
     private String beanClassName;
     private String scope;
+    private String beanPackage;
     private Object bean;
 
     @Override
@@ -18,7 +21,30 @@ public class DefaultBeanDefinition implements BeanDefinition {
     }
 
     @Override
+    public void SetBeanPackage(String beanPackage) {
+        this.beanPackage = beanPackage;
+    }
+
+    @Override
+    public String GetBeanPackage() {
+        return this.beanPackage;
+    }
+
+    @Override
     public Object getBean() {
+        if (this.bean == null) {
+            Class <?> clazz = null;
+            try {
+                clazz = Class.forName(this.beanPackage);
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException("Class with this package hasn't been found");
+            }
+            try {
+                return clazz.getDeclaredConstructor().newInstance();
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                throw new RuntimeException("Cannot create new bean for class" + this.beanClassName);
+            }
+        }
         return this.bean;
     }
 

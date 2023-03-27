@@ -5,12 +5,13 @@ import team.service.*;
 
 public class Application {
 
-    public static void  main(String[] args) {
-        ApplicationContext context = new ApplicationContext("src/test/beans.xml");
-//        ApplicationContext context = new ApplicationContext("team");
+    public static void main(String[] args) {
+         ApplicationContext context = new ApplicationContext("src/test/beans.xml");
+        // ApplicationContext context = new ApplicationContext("team");
 
-        ServiceB serviceB = context.getBean(ServiceB.class);
-        serviceB.jobB();
+         ServiceB serviceB = context.getBean(ServiceB.class);
+         serviceB.jobB();
+
 
 /*
         ServiceB serviceB1 = context.getBean(ServiceB.class);

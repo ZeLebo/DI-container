@@ -5,6 +5,10 @@ public interface BeanDefinition {
     String getBeanName();
     void SetBeanName(String beanName);
 
+    void SetBeanPackage(String beanPackage);
+
+    String GetBeanPackage();
+
     Object getBean();
 
     void setBean(Object bean);

@@ -5,8 +5,8 @@
     </base-packages>
     <beans>
         <bean id="ServiceBImpl" class="team.service.impl.ServiceBImpl"/>
-        <bean id="serviceB" class="team.service.ServiceB">
-            <constructor-arg ref="serviceBImpl"/>
-        </bean>
+        <bean id="serviceB" class="team.service.ServiceB" ref="ServiceBImpl"/>
+        <bean id="zwei" class="team.service.impl.MusicServiceImpl"/>
+        <bean id="MusicService" class="team.service.MusicService" ref="zwei"/>
     </beans>
 </configuration>

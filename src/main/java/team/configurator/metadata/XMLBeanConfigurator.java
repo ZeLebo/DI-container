@@ -1,6 +1,7 @@
 package team.configurator.metadata;
 
 import lombok.Getter;
+import lombok.SneakyThrows;
 import org.reflections.Reflections;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -14,6 +15,7 @@ import team.service.ServiceB;
 import team.service.impl.ServiceBImpl;
 
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,7 +26,7 @@ public class XMLBeanConfigurator implements BeanConfigurator {
     private Reflections scanner;
     private String FILENAME = "beans.xml";
     private final Map<Class, Class> interfaceToImplementation;
-    private static final Map<Class, BeanDefinition> beans = new ConcurrentHashMap<>();
+    private static Map<String, BeanDefinition> beans = new ConcurrentHashMap<>();
 
     private static final String BASE_PACKAGE_TAG = "base-package";
     private static final String BEAN_TAG = "bean";
@@ -44,7 +46,8 @@ public class XMLBeanConfigurator implements BeanConfigurator {
     public XMLBeanConfigurator(String filename) {
         this.FILENAME = filename;
         this.interfaceToImplementation = new ConcurrentHashMap<>();
-        this.interfaceToImplementation.put(ServiceB.class, ServiceBImpl.class);
+//        this.interfaceToImplementation.put(ServiceB.class, ServiceBImpl.class);
+        this.parseXML();
     }
 
     public XMLBeanConfigurator(Map<Class, Class> interfaceToImplementation) {
@@ -60,25 +63,43 @@ public class XMLBeanConfigurator implements BeanConfigurator {
     public void setBeanFactory(BeanFactory beanFactory) {
     }
 
+    @SneakyThrows
     public void parseXML() {
-        // parse xml file and put classes in map
-        try {
-            Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(this.FILENAME);
-            parseBeans(document.getElementsByTagName(BEAN_TAG));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(this.FILENAME);
+        parseBeans(document.getElementsByTagName(BEAN_TAG));
     }
 
-    public void parseBeans(NodeList beans) {
-        if (beans.getLength() == 0) {
+    public void parseBeans(NodeList nodeBeans) {
+        if (nodeBeans.getLength() == 0) {
             throw new RuntimeException("No beans found in " + FILENAME);
         }
-        for (int i = 0; i < beans.getLength(); i++) {
-            Element bean = (Element) beans.item(i);
+        for (int i = 0; i < nodeBeans.getLength(); i++) {
+            Element bean = (Element) nodeBeans.item(i);
             BeanDefinition beanDefinition = new DefaultBeanDefinition();
             beanDefinition.setBeanClassName(bean.getAttribute(BEAN_CLASS_NAME_ATTRIBUTE));
-            beanDefinition.setBean(bean);
+            if (bean.hasAttribute(SCOPE_ATTRIBUTE)) {
+                beanDefinition.setScope(bean.getAttribute("scope"));
+            }
+
+            beans.put(bean.getAttribute("id"), beanDefinition);
+        }
+        parseImplementations(nodeBeans);
+    }
+
+    @SneakyThrows
+    public void parseImplementations(NodeList nodeBeans) {
+        if (nodeBeans.getLength() == 0) {
+            throw new RuntimeException("No beans found in " + FILENAME);
+        }
+
+        for (int i = 0; i < nodeBeans.getLength(); i++) {
+            Element bean = (Element) nodeBeans.item(i);
+            if (bean.hasAttribute(REF_ATTRIBUTE)) {
+                interfaceToImplementation.put(
+                        Class.forName(bean.getAttribute(BEAN_CLASS_NAME_ATTRIBUTE)),
+                        Class.forName(beans.get(bean.getAttribute(REF_ATTRIBUTE)).getBeanClassName())
+                );
+            }
         }
     }
 

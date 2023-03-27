@@ -1,6 +1,7 @@
 package team.service.impl;
 
 import team.annotations.Inject;
+import team.annotations.Provided;
 import team.annotations.Service;
 import team.service.FrontService;
 import team.service.MusicService;
@@ -9,6 +10,7 @@ import team.service.PictureService;
 import java.util.concurrent.TimeUnit;
 
 @Service
+@Provided
 public class FrontServiceImpl implements FrontService {
     @Inject
     private MusicService musicService;

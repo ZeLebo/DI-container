@@ -1,50 +1,65 @@
 package team.factory;
 
 import lombok.Getter;
-import lombok.SneakyThrows;
-import team.annotations.Inject;
-import team.config.Configuration;
-import team.config.JavaConfiguration;
+import team.config.BeanDefinition;
+import team.config.DefaultBeanDefinition;
 import team.configurator.BeanConfigurator;
-import team.configurator.JavaBeanConfigurator;
-import team.context.ApplicationContext;
 
-import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.stream.Collectors;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-//The BeanFactory is the actual container which instantiates, configures, and manages a number of beans.
+/*
+    BeanFactory manages the beans themselves
+ */
 public class BeanFactory {
+    // do I need here BeanDefinition?
+    private final Map<Class, BeanDefinition> singletonBeanMap = new ConcurrentHashMap<>();
+    private final Map<Class, Map<Thread, BeanDefinition>> threadBeanMap = new ConcurrentHashMap<>();
+    private final Map<Class, BeanDefinition> providedBeanMap = new ConcurrentHashMap<>();
+
+
     @Getter
     private final BeanConfigurator beanConfigurator;
-    private final Configuration configuration;
-    // application context
-    private ApplicationContext applicationContext;
 
-//    for now we have config package, configurations will be stored as xml
-    public BeanFactory(ApplicationContext applicationContext) {
-        this.configuration = new JavaConfiguration();
-        this.beanConfigurator = new JavaBeanConfigurator(configuration.GetPackageToScan(), configuration.getInterfaceToImplementetions());
-        this.applicationContext = applicationContext;
+    public BeanFactory(BeanConfigurator beanConfigurator) {
+        this.beanConfigurator = beanConfigurator;
     }
-    
-//    Add exceptions checking later
-    @SneakyThrows
-    public <T> T getBean(Class<T> tClass) {
-//         check if tClass is interface then find suitable implementation
-//         else tClass is just a class then only create it
-        Class<? extends T> implementationClass = tClass;
-        if (implementationClass.isInterface()) {
-            implementationClass = beanConfigurator.getImplementationClass(implementationClass);
-        }
-        T bean = implementationClass.getDeclaredConstructor().newInstance();
 
-//        go through the beans fields and see which dependencies need to be implemented
-        for(Field field : Arrays.stream(implementationClass.getDeclaredFields()).filter(field -> field.isAnnotationPresent(Inject.class)).collect(Collectors.toList())) {
-            field.setAccessible(true);
-            field.set(bean, applicationContext.getBean(field.getType()));
+    // check the bean in the map and generate if not exist
+    public synchronized <T> T getBean(Class<T> tClass) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+        // check for the bean in map
+        if (singletonBeanMap.containsKey(tClass)) {
+            return (T) singletonBeanMap.get(tClass).getBean();
+        }
+        if (threadBeanMap.containsKey(tClass)) {
+            if (threadBeanMap.get(tClass).containsKey(Thread.currentThread())) {
+                return (T) threadBeanMap.get(tClass).get(Thread.currentThread()).getBean();
+            }
+        }
+        if (providedBeanMap.containsKey(tClass)) {
+            return (T) providedBeanMap.get(tClass).getBean().getClass().getDeclaredConstructor().newInstance();
         }
 
-        return bean;
+        BeanDefinition bean = null;
+        try {
+            bean = beanConfigurator.generateBean(tClass);
+        } catch (InstantiationException | InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+        switch (bean.getScope()) {
+            case "singleton":
+                singletonBeanMap.put(tClass, bean);
+                break;
+            case "thread":
+                threadBeanMap.put(tClass, Map.of(Thread.currentThread(), bean));
+                break;
+            case "provided":
+                providedBeanMap.put(tClass, bean);
+                break;
+        }
+
+        return (T) bean.getBean();
     }
+
 }

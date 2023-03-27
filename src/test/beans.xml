@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <base-packages>
+        <base-package>team</base-package>
+    </base-packages>
+    <beans>
+<!--        ref in bean for @Service annotation in java-->
+<!--        ref in constructor-arg for @inject annotation-->
+        <bean id="ServiceBImpl" class="team.service.impl.ServiceBImpl" scope="thread"/>
+        <bean id="serviceB" class="team.service.ServiceB" ref="ServiceBImpl"/>
+        <bean id="MusicServiceImpl" class="team.service.impl.MusicServiceImpl"/>
+        <bean id="MusicService" class="team.service.MusicService" ref="MusicServiceImpl"/>
+        <bean id="PictureServiceImpl" class="team.service.impl.PictureServiceImpl"/>
+        <bean id="PictureService" class="team.service.PictureService" ref="PictureServiceImpl"/>
+        <bean id="FrontServiceImpl" class="team.service.impl.FrontServiceImpl">
+            <constructor-arg ref="PictureServiceImpl" field="pictureService"/>
+            <constructor-arg ref="MusicServiceImpl" field="musicService"/>
+        </bean>
+        <bean id="FrontService" class="team.service.FrontService" ref="FrontServiceImpl"/>
+    </beans>
+</configuration>

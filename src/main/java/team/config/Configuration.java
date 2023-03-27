@@ -4,7 +4,7 @@ import java.util.Map;
 
 public interface Configuration {
 
-    String GetPackageToScan();
+    Map<Class, Class> getInterfaceToImplementations();
 
-    Map<Class, Class> getInterfaceToImplementetions();
+    void addInterfaceToImplementations(Class interfaceClass, Class implementation);
 }

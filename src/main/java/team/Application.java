@@ -2,28 +2,28 @@ package team;
 
 import lombok.SneakyThrows;
 import team.context.ApplicationContext;
-import team.factory.BeanFactory;
 import team.service.*;
 
 public class Application {
-    public ApplicationContext run() {
-        ApplicationContext applicationContext = new ApplicationContext();
-        BeanFactory beanFactory = new BeanFactory(applicationContext);
-        applicationContext.setBeanFactory(beanFactory);
+    private static final String packageToScan = "team";
+//    private static final String packageToScan = "src/test/beans.xml";
 
-        return applicationContext;
-    }
+    volatile static ApplicationContext context = new ApplicationContext(packageToScan);
 
-    public static void  main(String[] args) {
-        Application application = new Application();
-        ApplicationContext context = application.run();
-
+    @SneakyThrows
+    public static void main(String[] args) {
         ServiceB serviceB = context.getBean(ServiceB.class);
-        FrontService frontService = context.getBean(FrontService.class);
         serviceB.jobB();
+        serviceB.jobB();
+
+        Thread thread = new Thread(() -> {
+            ServiceB serviceB1 = context.getBean(ServiceB.class);
+            serviceB1.jobB();
+        });
+        thread.start();
+
+        FrontService frontService = context.getBean(FrontService.class);
         frontService.siteLoading();
 
-        SomeService someService = context.getBean(SomeService.class);
-        someService.prepare();
     }
 }

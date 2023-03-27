@@ -5,8 +5,8 @@ import team.context.ApplicationContext;
 import team.service.*;
 
 public class Application {
-//    private static final String packageToScan = "team";
-    private static final String packageToScan = "src/test/beans.xml";
+    private static final String packageToScan = "team";
+//    private static final String packageToScan = "src/test/beans.xml";
 
     volatile static ApplicationContext context = new ApplicationContext(packageToScan);
 

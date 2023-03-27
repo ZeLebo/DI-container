@@ -32,19 +32,6 @@ public class DefaultBeanDefinition implements BeanDefinition {
 
     @Override
     public Object getBean() {
-        if (this.bean == null) {
-            Class <?> clazz = null;
-            try {
-                clazz = Class.forName(this.beanPackage);
-            } catch (ClassNotFoundException e) {
-                throw new RuntimeException("Class with this package hasn't been found");
-            }
-            try {
-                return clazz.getDeclaredConstructor().newInstance();
-            } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                throw new RuntimeException("Cannot create new bean for class" + this.beanClassName);
-            }
-        }
         return this.bean;
     }
 

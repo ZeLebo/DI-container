@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
     BeanFactory manages the beans themselves
  */
 public class BeanFactory {
+    // do I need here BeanDefinition?
     private final Map<Class, BeanDefinition> singletonBeanMap = new ConcurrentHashMap<>();
     private final Map<Class, Map<Thread, BeanDefinition>> threadBeanMap = new ConcurrentHashMap<>();
     private final Map<Class, BeanDefinition> providedBeanMap = new ConcurrentHashMap<>();

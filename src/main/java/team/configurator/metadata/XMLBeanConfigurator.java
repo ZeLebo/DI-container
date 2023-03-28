@@ -13,21 +13,20 @@ import team.factory.BeanFactory;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@SuppressWarnings("unused")
 public class XMLBeanConfigurator implements BeanConfigurator {
     @Getter
     private Reflections scanner;
     private BeanFactory beanFactory;
-    private String FILENAME = "beans.xml";
-    // contains the map of ClassInterface to Class of implementations
-    private final Map<Class, Class> interfaceToImplementation;
+    private String FILENAME;
     // map for mapping naming (id in XML) to BeanDefinition
     private static final Map<String, BeanDefinition> beansToBeanDefinitions = new ConcurrentHashMap<>();
     // Map <BeanId> -> Map<field name, beanIdToResolve>
-    private static final Map<String, Map<String, String>> injectsMap = new ConcurrentHashMap<>();
+    private static final Map<String, String> nameToReference = new ConcurrentHashMap<>();
 
     private static final String BASE_PACKAGE_TAG = "base-package";
     private static final String BEAN_TAG = "bean";
@@ -35,24 +34,13 @@ public class XMLBeanConfigurator implements BeanConfigurator {
     private static final String BEAN_CLASS_NAME_ATTRIBUTE = "class";
     private static final String SCOPE_ATTRIBUTE = "scope";
     private static final String CONSTRUCTOR_ARGUMENT_TAG = "constructor-arg";
-    private static final String NAME_ATTRIBUTE = "name";
     private static final String REF_ATTRIBUTE = "ref";
     private static final String FIELD_ATTRIBUTE = "field";
+    private static final String POST_CONSTRUCT_ATTRIBUTE = "post-construct";
 
     public XMLBeanConfigurator(String filename) {
         this.FILENAME = filename;
-        this.interfaceToImplementation = new ConcurrentHashMap<>();
-//        this.interfaceToImplementation.put(ServiceB.class, ServiceBImpl.class);
         this.parseXML();
-    }
-
-    public XMLBeanConfigurator(Map<Class, Class> interfaceToImplementation) {
-        this.interfaceToImplementation = interfaceToImplementation;
-    }
-
-    public XMLBeanConfigurator(String filename, Map<Class, Class> interfaceToImplementation) {
-        this.FILENAME = filename;
-        this.interfaceToImplementation = interfaceToImplementation;
     }
 
     @Override
@@ -73,18 +61,30 @@ public class XMLBeanConfigurator implements BeanConfigurator {
         for (int i = 0; i < nodeBeans.getLength(); i++) {
             Element bean = (Element) nodeBeans.item(i);
             BeanDefinition beanDefinition = new DefaultBeanDefinition();
-            if (bean.hasAttribute(BEAN_CLASS_NAME_ATTRIBUTE)) {
-                beanDefinition.setBeanClassName(bean.getAttribute(BEAN_CLASS_NAME_ATTRIBUTE));
+            if (!bean.hasAttribute(BEAN_CLASS_NAME_ATTRIBUTE)) {
+                throw new RuntimeException("Some beans don't have reference class");
             }
+            beanDefinition.setBeanClassName(bean.getAttribute(BEAN_CLASS_NAME_ATTRIBUTE));
+
+            beanDefinition.setScope("singleton");
             if (bean.hasAttribute(SCOPE_ATTRIBUTE)) {
-                beanDefinition.setScope(bean.getAttribute("scope"));
+                beanDefinition.setScope(bean.getAttribute(SCOPE_ATTRIBUTE));
             }
 
-            if (!bean.hasAttribute("id")) {
+            if (!bean.hasAttribute(BEAN_NAME_ATTRIBUTE)) {
                 throw new RuntimeException("Some beans don't have id");
             }
+            beanDefinition.setBeanName(bean.getAttribute(BEAN_NAME_ATTRIBUTE));
 
-            beansToBeanDefinitions.put(bean.getAttribute("id"), beanDefinition);
+            if(bean.hasAttribute(POST_CONSTRUCT_ATTRIBUTE)) {
+                beanDefinition.setPostConstructMethod(bean.getAttribute(POST_CONSTRUCT_ATTRIBUTE));
+            }
+
+            nameToReference.put(
+                    bean.getAttribute(BEAN_NAME_ATTRIBUTE),
+                    bean.getAttribute(BEAN_CLASS_NAME_ATTRIBUTE)
+            );
+            beansToBeanDefinitions.put(bean.getAttribute(BEAN_CLASS_NAME_ATTRIBUTE), beanDefinition);
         }
         parseImplementations(nodeBeans);
         parseInjects(nodeBeans);
@@ -99,9 +99,11 @@ public class XMLBeanConfigurator implements BeanConfigurator {
         for (int i = 0; i < nodeBeans.getLength(); i++) {
             Element bean = (Element) nodeBeans.item(i);
             if (bean.hasAttribute(REF_ATTRIBUTE)) {
-                interfaceToImplementation.put(
-                        Class.forName(bean.getAttribute(BEAN_CLASS_NAME_ATTRIBUTE)),
-                        Class.forName(beansToBeanDefinitions.get(bean.getAttribute(REF_ATTRIBUTE)).getBeanClassName())
+                String path = nameToReference.get(bean.getAttribute(REF_ATTRIBUTE));
+                // put info about implementation
+                BeanDefinition beanDefinition = beansToBeanDefinitions.get(bean.getAttribute(BEAN_CLASS_NAME_ATTRIBUTE));
+                beanDefinition.setImplementation(
+                        Class.forName(beansToBeanDefinitions.get(path).getBeanClassName())
                 );
             }
         }
@@ -116,73 +118,76 @@ public class XMLBeanConfigurator implements BeanConfigurator {
             if (injects.getLength() == 0) {
                 continue;
             }
-            // create a map of all inject to stuff
-            Map<String, String> fieldBeanPair = new ConcurrentHashMap<>();
             for (int j = 0; j < injects.getLength(); j++) {
                 Element beanToInject = (Element) injects.item(j);
                 String fieldName = beanToInject.getAttribute(FIELD_ATTRIBUTE);
                 String beanImpl = beanToInject.getAttribute(REF_ATTRIBUTE);
-                fieldBeanPair.put(fieldName, beanImpl);
+                String path = nameToReference.get(bean.getAttribute(BEAN_NAME_ATTRIBUTE));
+                BeanDefinition beanDefinition = beansToBeanDefinitions.get(path);
+                beanDefinition.putInject(fieldName, beanImpl);
             }
-            injectsMap.put(
-                    bean.getAttribute(BEAN_CLASS_NAME_ATTRIBUTE),
-                    fieldBeanPair
-            );
 
         }
     }
 
     @Override
     public <T> Class getImplementationClass(Class<T> interfaceClass) {
-        // return class from interfaceToImplementation map
-        // if class doesn't exist in map -> throw exception
-        if (interfaceToImplementation.containsKey(interfaceClass)) {
-            return interfaceToImplementation.get(interfaceClass);
-        } else {
-            throw new RuntimeException("No implementation for " + interfaceClass.getName());
-        }
-
+        return (Class <T>) beansToBeanDefinitions.get(interfaceClass.getName()).getImplementation();
     }
 
 
     @SneakyThrows
     @Override
-    public <T> DefaultBeanDefinition generateBean(Class<T> tClass) {
+    public <T> BeanDefinition generateBean(Class<T> tClass) {
+        Class clz = tClass;
         if (tClass.isInterface())  {
-            tClass = (Class<T>) this.getImplementationClass(tClass);
+            tClass = (Class <T>) beansToBeanDefinitions.get(tClass.getName()).getImplementation();
         }
         T bean = tClass.getDeclaredConstructor().newInstance();
 
-        // inject all the dependencies
-        Map<String, String> toInject = injectsMap.get(tClass.getName());
-        if (toInject != null) {
-            // have something to inject
-            for (Field field: tClass.getDeclaredFields()) {
-                String beanId = toInject.get(field.getName());
-                if (beanId != null) {
-                    // need to inject in this field
-                    field.setAccessible(true);
-                    field.set(bean, this.beanFactory.getBean(
-                            Class.forName(beansToBeanDefinitions.get(beanId).getBeanClassName())
-                    ));
+
+        //inject all dependencies from beanDefinition
+        BeanDefinition beanDefinition = beansToBeanDefinitions.get(tClass.getName());
+        if (beanDefinition.getScope() == null) {
+            beanDefinition.setScope("singleton");
+        }
+        // need to put the bean to map from here
+        this.beanFactory.addBean(clz, beanDefinition);
+
+        for (Field field : tClass.getDeclaredFields()) {
+            String ref = beanDefinition.getInject(field.getName());
+            if (ref == null) {
+                continue;
+            }
+
+            ref = nameToReference.get(ref);
+
+            field.setAccessible(true);
+            field.set(
+                    bean,
+                    this.beanFactory.getBean(Class.forName(ref)));
+        }
+        beanDefinition.setBean(bean);
+        this.callPostProcessor(bean);
+
+        return beanDefinition;
+    }
+
+    private void callPostProcessor(Object bean) {
+        BeanDefinition beanDefinition = beansToBeanDefinitions.get(bean.getClass().getName());
+        String postConstructMethod = beanDefinition.getPostConstructMethod();
+        if (postConstructMethod == null) {
+            return;
+        }
+        
+        for (Method method : bean.getClass().getMethods()) {
+            if (method.getName().equals(postConstructMethod)) {
+                try {
+                    method.invoke(bean);
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    throw new RuntimeException(e);
                 }
             }
         }
-
-        DefaultBeanDefinition tmp = new DefaultBeanDefinition();
-        tmp.setBean(bean);
-        tmp.setBeanClassName(bean.getClass().getName());
-
-        // get bean's scope
-        for (Map.Entry<String, BeanDefinition> entry : beansToBeanDefinitions.entrySet()) {
-            if (entry.getValue().getBeanClassName().equals(tClass.getName())) {
-                tmp.setScope(entry.getValue().getScope());
-            }
-        }
-        if (tmp.getScope() == null) {
-            tmp.setScope("singleton");
-        }
-
-        return tmp;
     }
 }

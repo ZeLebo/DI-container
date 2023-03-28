@@ -19,6 +19,11 @@ public class FrontServiceImpl implements FrontService {
     private PictureService pictureService;
 
     @Override
+    public void test() {
+        System.out.println("test of inject in inject");
+    }
+
+    @Override
     public void siteLoading() {
         try {
             musicService.musicLoading();

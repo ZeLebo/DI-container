@@ -1,14 +1,16 @@
 package team.config;
 
-import java.lang.reflect.InvocationTargetException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-@SuppressWarnings("unused")
 public class DefaultBeanDefinition implements BeanDefinition {
     private String beanName;
     private String beanClassName;
     private String scope;
-    private String beanPackage;
     private Object bean;
+    private Class implementation;
+    private String postConstructMethod;
+    private static final Map<String, String> injectsMap = new ConcurrentHashMap<>();
 
     @Override
     public String getBeanName() {
@@ -16,19 +18,41 @@ public class DefaultBeanDefinition implements BeanDefinition {
     }
 
     @Override
-    public void SetBeanName(String beanName) {
+    public void setBeanName(String beanName) {
         this.beanName = beanName;
     }
 
     @Override
-    public void SetBeanPackage(String beanPackage) {
-        this.beanPackage = beanPackage;
+    public void setImplementation(Class implementation) {
+        this.implementation = implementation;
     }
 
     @Override
-    public String GetBeanPackage() {
-        return this.beanPackage;
+    public Class getImplementation() {
+        return this.implementation;
     }
+
+    @Override
+    public void putInject(String field, String reference) {
+        injectsMap.put(field, reference);
+    }
+
+    @Override
+    public String getInject(String field) {
+        return injectsMap.get(field);
+    }
+
+    @Override
+    public void setPostConstructMethod(String postConstructMethod) {
+        this.postConstructMethod = postConstructMethod;
+    }
+
+
+    @Override
+    public String getPostConstructMethod() {
+        return this.postConstructMethod;
+    }
+
 
     @Override
     public Object getBean() {

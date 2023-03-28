@@ -6,7 +6,9 @@ import team.config.DefaultBeanDefinition;
 import team.configurator.BeanConfigurator;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /*
@@ -17,6 +19,7 @@ public class BeanFactory {
     private final Map<Class, BeanDefinition> singletonBeanMap = new ConcurrentHashMap<>();
     private final Map<Class, Map<Thread, BeanDefinition>> threadBeanMap = new ConcurrentHashMap<>();
     private final Map<Class, BeanDefinition> providedBeanMap = new ConcurrentHashMap<>();
+    private final Set<Class> queueForGenerate = new HashSet<>();
 
 
     @Getter
@@ -24,6 +27,15 @@ public class BeanFactory {
 
     public BeanFactory(BeanConfigurator beanConfigurator) {
         this.beanConfigurator = beanConfigurator;
+    }
+
+    public synchronized void addBean(Class clz, BeanDefinition beanDefinition) {
+        switch (beanDefinition.getScope()) {
+            case "singleton" -> singletonBeanMap.put(clz, beanDefinition);
+            case "thread" -> threadBeanMap.put(clz, Map.of(Thread.currentThread(), beanDefinition));
+            case "provided" -> providedBeanMap.put(clz, beanDefinition);
+        }
+
     }
 
     // check the bean in the map and generate if not exist
@@ -43,21 +55,17 @@ public class BeanFactory {
 
         BeanDefinition bean = null;
         try {
+            if (queueForGenerate.contains(tClass)) {
+                throw new RuntimeException("Cyclic dependency");
+            }
+            queueForGenerate.add(tClass);
             bean = beanConfigurator.generateBean(tClass);
+            queueForGenerate.remove(tClass);
         } catch (InstantiationException | InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
-        switch (bean.getScope()) {
-            case "singleton":
-                singletonBeanMap.put(tClass, bean);
-                break;
-            case "thread":
-                threadBeanMap.put(tClass, Map.of(Thread.currentThread(), bean));
-                break;
-            case "provided":
-                providedBeanMap.put(tClass, bean);
-                break;
-        }
+
+        this.addBean(tClass, bean);
 
         return (T) bean.getBean();
     }

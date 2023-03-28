@@ -4,6 +4,7 @@ import lombok.Getter;
 import org.reflections.Reflections;
 import team.annotations.*;
 import team.annotations.Thread;
+import team.config.BeanDefinition;
 import team.config.DefaultBeanDefinition;
 import team.configurator.BeanConfigurator;
 import team.factory.BeanFactory;
@@ -20,6 +21,7 @@ public class JavaBeanConfigurator implements BeanConfigurator {
     @Getter
     private Reflections scanner;
     private final Map<Class, Class> interfaceToImplementation;
+    private static final Map<String, BeanDefinition> beansToBeanDefinitions = new ConcurrentHashMap<>();
     private BeanFactory beanFactory;
 
     @Override
@@ -34,12 +36,25 @@ public class JavaBeanConfigurator implements BeanConfigurator {
 
 
     @Override
-    public <T> DefaultBeanDefinition generateBean(Class<T> tClass) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public <T> BeanDefinition generateBean(Class<T> tClass) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        Class tmp = tClass;
         if (tClass.isInterface()) {
             tClass = (Class<T>) this.getImplementationClass(tClass);
         }
         T bean = tClass.getDeclaredConstructor().newInstance();
-        // get all constructors
+        BeanDefinition beanDefinition = new DefaultBeanDefinition();
+        beanDefinition.setBeanClassName(bean.getClass().getName());
+        beanDefinition.setScope("singleton");
+        if (tClass.isAnnotationPresent(Thread.class)) {
+            beanDefinition.setScope("thread");
+        } else if (tClass.isAnnotationPresent(Provided.class)) {
+            beanDefinition.setScope("provided");
+        }
+
+        // to be able to connect it somewhere
+        beanDefinition.setBean(bean);
+        this.beanFactory.addBean(tmp, beanDefinition);
+
 
         // inject all the fields with annotation @inject
         for (Field field : Arrays.stream(tClass.getDeclaredFields()).filter(field -> field.isAnnotationPresent(Inject.class)).toList()) {
@@ -47,18 +62,12 @@ public class JavaBeanConfigurator implements BeanConfigurator {
             field.set(bean, this.beanFactory.getBean(field.getType()));
         }
 
+        beanDefinition.setBean(bean);
+
         this.callPostProcessor(bean);
 
-        DefaultBeanDefinition tmp = new DefaultBeanDefinition();
-        tmp.setBean(bean);
-        tmp.setBeanClassName(bean.getClass().getName());
-        tmp.setScope("singleton");
-        if (tClass.isAnnotationPresent(Thread.class)) {
-            tmp.setScope("thread");
-        } else if (tClass.isAnnotationPresent(Provided.class)) {
-            tmp.setScope("provided");
-        }
-        return tmp;
+        return beanDefinition;
+
     }
 
     private void callPostProcessor(Object bean) {

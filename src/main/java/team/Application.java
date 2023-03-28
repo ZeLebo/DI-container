@@ -2,10 +2,8 @@ package team;
 
 import lombok.SneakyThrows;
 import team.context.ApplicationContext;
-import team.service.*;
-import team.service.impl.ServiceBImpl;
-
-import java.util.List;
+import team.service.FrontService;
+import team.service.ServiceB;
 
 public class Application {
 //    private static final String packageToScan = "team";
@@ -15,6 +13,7 @@ public class Application {
 
     @SneakyThrows
     public static void main(String[] args) {
+
         ServiceB serviceB = context.getBean(ServiceB.class);
         serviceB.jobB();
         serviceB.jobB();

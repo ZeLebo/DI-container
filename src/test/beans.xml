@@ -8,7 +8,9 @@
 <!--        ref in constructor-arg for @inject annotation-->
         <bean id="ServiceBImpl" class="team.service.impl.ServiceBImpl" scope="thread"/>
         <bean id="serviceB" class="team.service.ServiceB" ref="ServiceBImpl"/>
-        <bean id="MusicServiceImpl" class="team.service.impl.MusicServiceImpl"/>
+        <bean id="MusicServiceImpl" class="team.service.impl.MusicServiceImpl">
+            <constructor-arg ref="FrontServiceImpl" field="front"/>
+        </bean>
         <bean id="MusicService" class="team.service.MusicService" ref="MusicServiceImpl"/>
         <bean id="PictureServiceImpl" class="team.service.impl.PictureServiceImpl"/>
         <bean id="PictureService" class="team.service.PictureService" ref="PictureServiceImpl"/>

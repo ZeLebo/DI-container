@@ -7,7 +7,6 @@ public class DefaultBeanDefinition implements BeanDefinition {
     private String beanName;
     private String beanClassName;
     private String scope;
-    private String beanPackage;
     private Object bean;
     private Class implementation;
     private String postConstructMethod;
@@ -54,16 +53,6 @@ public class DefaultBeanDefinition implements BeanDefinition {
         return this.postConstructMethod;
     }
 
-
-    @Override
-    public void setBeanPackage(String beanPackage) {
-        this.beanPackage = beanPackage;
-    }
-
-    @Override
-    public String getBeanPackage() {
-        return this.beanPackage;
-    }
 
     @Override
     public Object getBean() {

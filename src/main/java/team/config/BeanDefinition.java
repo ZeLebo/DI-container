@@ -1,13 +1,24 @@
 package team.config;
 
+import lombok.SneakyThrows;
+
 @SuppressWarnings("unused")
 public interface BeanDefinition {
     String getBeanName();
-    void SetBeanName(String beanName);
+    void setBeanName(String beanName);
 
-    void SetBeanPackage(String beanPackage);
+    void setImplementation(Class implementation);
 
-    String GetBeanPackage();
+    Class getImplementation();
+
+    void putInject(String field, String reference);
+
+    @SneakyThrows
+    String getInject(String field);
+
+    void setBeanPackage(String beanPackage);
+
+    String getBeanPackage();
 
     Object getBean();
 

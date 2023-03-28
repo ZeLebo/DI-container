@@ -22,10 +22,6 @@ public class JavaBeanConfigurator implements BeanConfigurator {
     private final Map<Class, Class> interfaceToImplementation;
     private BeanFactory beanFactory;
 
-    public JavaBeanConfigurator(Map<Class, Class> implementations) {
-        this.interfaceToImplementation = implementations;
-    }
-
     @Override
     public void setBeanFactory(BeanFactory beanFactory) {
         this.beanFactory = beanFactory;
@@ -36,14 +32,6 @@ public class JavaBeanConfigurator implements BeanConfigurator {
         this.interfaceToImplementation = new ConcurrentHashMap<>();
     }
 
-    public void setPackageToScan(String packageToScan) {
-        this.scanner = new Reflections(packageToScan);
-    }
-
-    public JavaBeanConfigurator(String packageToScan, Map<Class, Class> interfaceToImplementation) {
-        this.scanner = new Reflections(packageToScan);
-        this.interfaceToImplementation = new ConcurrentHashMap<>(interfaceToImplementation);
-    }
 
     @Override
     public <T> DefaultBeanDefinition generateBean(Class<T> tClass) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
@@ -51,6 +39,7 @@ public class JavaBeanConfigurator implements BeanConfigurator {
             tClass = (Class<T>) this.getImplementationClass(tClass);
         }
         T bean = tClass.getDeclaredConstructor().newInstance();
+        // get all constructors
 
         // inject all the fields with annotation @inject
         for (Field field : Arrays.stream(tClass.getDeclaredFields()).filter(field -> field.isAnnotationPresent(Inject.class)).toList()) {

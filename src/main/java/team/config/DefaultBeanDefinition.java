@@ -1,6 +1,9 @@
 package team.config;
 
-import java.lang.reflect.InvocationTargetException;
+import lombok.SneakyThrows;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @SuppressWarnings("unused")
 public class DefaultBeanDefinition implements BeanDefinition {
@@ -9,6 +12,9 @@ public class DefaultBeanDefinition implements BeanDefinition {
     private String scope;
     private String beanPackage;
     private Object bean;
+    private Class implementation;
+
+    private static final Map<String, String> injectsMap = new ConcurrentHashMap<>();
 
     @Override
     public String getBeanName() {
@@ -16,17 +22,39 @@ public class DefaultBeanDefinition implements BeanDefinition {
     }
 
     @Override
-    public void SetBeanName(String beanName) {
+    public void setBeanName(String beanName) {
         this.beanName = beanName;
     }
 
     @Override
-    public void SetBeanPackage(String beanPackage) {
+    public void setImplementation(Class implementation) {
+        this.implementation = implementation;
+    }
+
+    @Override
+    public Class getImplementation() {
+        return this.implementation;
+    }
+
+    @Override
+    public void putInject(String field, String reference) {
+        injectsMap.put(field, reference);
+    }
+
+    @SneakyThrows
+    @Override
+    public String getInject(String field) {
+        return injectsMap.get(field);
+    }
+
+
+    @Override
+    public void setBeanPackage(String beanPackage) {
         this.beanPackage = beanPackage;
     }
 
     @Override
-    public String GetBeanPackage() {
+    public String getBeanPackage() {
         return this.beanPackage;
     }
 

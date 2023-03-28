@@ -5,7 +5,6 @@ import lombok.SneakyThrows;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@SuppressWarnings("unused")
 public class DefaultBeanDefinition implements BeanDefinition {
     private String beanName;
     private String beanClassName;
@@ -13,7 +12,7 @@ public class DefaultBeanDefinition implements BeanDefinition {
     private String beanPackage;
     private Object bean;
     private Class implementation;
-
+    private String postConstructMethod;
     private static final Map<String, String> injectsMap = new ConcurrentHashMap<>();
 
     @Override
@@ -45,6 +44,17 @@ public class DefaultBeanDefinition implements BeanDefinition {
     @Override
     public String getInject(String field) {
         return injectsMap.get(field);
+    }
+
+    @Override
+    public void setPostConstructMethod(String postConstructMethod) {
+        this.postConstructMethod = postConstructMethod;
+    }
+
+
+    @Override
+    public String getPostConstructMethod() {
+        return this.postConstructMethod;
     }
 
 

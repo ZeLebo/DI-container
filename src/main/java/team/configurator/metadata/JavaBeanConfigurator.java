@@ -63,7 +63,6 @@ public class JavaBeanConfigurator implements BeanConfigurator {
         }
 
         beanDefinition.setBean(bean);
-
         this.callPostProcessor(bean);
 
         return beanDefinition;

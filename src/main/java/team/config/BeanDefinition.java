@@ -2,7 +2,7 @@ package team.config;
 
 import lombok.SneakyThrows;
 
-@SuppressWarnings("unused")
+@SuppressWarnings("raw")
 public interface BeanDefinition {
     String getBeanName();
     void setBeanName(String beanName);
@@ -15,6 +15,10 @@ public interface BeanDefinition {
 
     @SneakyThrows
     String getInject(String field);
+
+    void setPostConstructMethod(String postConstructMethod);
+
+    String getPostConstructMethod();
 
     void setBeanPackage(String beanPackage);
 

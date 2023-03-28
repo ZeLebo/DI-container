@@ -1,7 +1,5 @@
 package team.config;
 
-import lombok.SneakyThrows;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -40,7 +38,6 @@ public class DefaultBeanDefinition implements BeanDefinition {
         injectsMap.put(field, reference);
     }
 
-    @SneakyThrows
     @Override
     public String getInject(String field) {
         return injectsMap.get(field);

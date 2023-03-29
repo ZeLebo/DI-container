@@ -26,6 +26,8 @@ public class Application {
 
         FrontService frontService = context.getBean(FrontService.class);
         frontService.siteLoading();
+        FrontService frontService1 = context.getBean(FrontService.class);
+        frontService1.siteLoading();
 
     }
 }

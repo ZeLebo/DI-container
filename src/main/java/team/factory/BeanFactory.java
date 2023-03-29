@@ -50,7 +50,7 @@ public class BeanFactory {
             }
         }
         if (providedBeanMap.containsKey(tClass)) {
-            return (T) providedBeanMap.get(tClass).getBean().getClass().getDeclaredConstructor().newInstance();
+            return (T) beanConfigurator.generateBean(tClass).getBean();
         }
 
         BeanDefinition bean = null;
